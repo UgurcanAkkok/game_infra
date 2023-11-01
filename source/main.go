@@ -13,5 +13,5 @@ func main() {
 	e := echo.New()
 	e.GET("/", getIsAlive)
 	e.GET("/isAlive", getIsAlive)
-	e.Logger.Fatal(e.Start(":8585"))
+	e.Logger.Fatal(e.Start(":8080"))
 }
