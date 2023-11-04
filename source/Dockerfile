@@ -8,6 +8,10 @@ RUN CGO_ENABLED=0 go build -o app
 
 FROM alpine:3.18.4
 
+ARG USERNAME=app
+RUN addgroup -S ${USERNAME} && adduser -S ${USERNAME} -G ${USERNAME}
+USER ${USERNAME}
+
 WORKDIR /app
 
 COPY --from=builder /src/app .
