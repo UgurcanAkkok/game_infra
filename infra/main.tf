@@ -65,11 +65,13 @@ resource "aws_iam_role_policy_attachment" "dev-AmazonEKSVPCResourceController" {
 
 // Network
 resource "aws_subnet" "dev-subnet" {
-  vpc_id = aws_vpc.dev-main-vpc.id
+  vpc_id     = aws_vpc.dev-main-vpc.id
+  cidr_block = "10.0.10.0/24"
 }
 
 resource "aws_vpc" "dev-main-vpc" {
-
+  cidr_block       = "10.0.0.0/16"
+  instance_tenancy = "default"
 }
 
 // ECR
