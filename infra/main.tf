@@ -1,3 +1,4 @@
+// Kubernetes
 resource "aws_eks_cluster" "dev-eks" {
   name     = "dev-eks"
   role_arn = aws_iam_role.dev-eks-role.arn
@@ -10,6 +11,14 @@ resource "aws_eks_cluster" "dev-eks" {
     aws_iam_role_policy_attachment.dev-AmazonEKSClusterPolicy,
     aws_iam_role_policy_attachment.dev-AmazonEKSVPCResourceController,
   ]
+}
+
+output "endpoint" {
+  value = aws_eks_cluster.dev-eks.endpoint
+}
+
+output "kubeconfig-certificate-authority-data" {
+  value = aws_eks_cluster.dev-eks.certificate_authority[0].data
 }
 
 resource "aws_eks_node_group" "dev-eks-nodegroup" {
@@ -25,6 +34,7 @@ resource "aws_eks_node_group" "dev-eks-nodegroup" {
   depends_on = [aws_eks_cluster.dev-eks]
 }
 
+// Iam
 data "aws_iam_policy_document" "assume_role" {
   statement {
     effect = "Allow"
@@ -53,6 +63,7 @@ resource "aws_iam_role_policy_attachment" "dev-AmazonEKSVPCResourceController" {
   role       = aws_iam_role.dev-eks-role.name
 }
 
+// Network
 resource "aws_subnet" "dev-subnet" {
   vpc_id = aws_vpc.dev-main-vpc.id
 }
@@ -61,14 +72,16 @@ resource "aws_vpc" "dev-main-vpc" {
 
 }
 
+// ECR
+resource "aws_ecr_repository" "gameblast-ecr" {
+  name                 = "gameblast-ecr"
+  image_tag_mutability = "MUTABLE"
 
-
-output "endpoint" {
-  value = aws_eks_cluster.dev-eks.endpoint
+  image_scanning_configuration {
+    scan_on_push = true
+  }
 }
 
-output "kubeconfig-certificate-authority-data" {
-  value = aws_eks_cluster.dev-eks.certificate_authority[0].data
+output "ecr_url" {
+  value = aws_ecr_repository.gameblast-ecr.repository_url
 }
-
-
