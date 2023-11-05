@@ -1,0 +1,16 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: goodblast-be
+spec:
+  template:
+    spec:
+      containers:
+        - image: goodblast/goodblast-be:0.1.0-c1699104752
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            successThreshold: 1
+            tcpSocket:
+              port: 8080
