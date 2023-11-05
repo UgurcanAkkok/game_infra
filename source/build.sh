@@ -18,3 +18,5 @@ echo "------------------------------"
 echo "The image is ready: $FULL_IMAGE_NAME"
 echo "------------------------------"
 echo "Pushing the image: $FULL_IMAGE_NAME"
+
+docker push $FULL_IMAGE_NAME
