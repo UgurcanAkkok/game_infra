@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: goodblast-be
+  name: goodblast-be
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: goodblast-be
+  template:
+    metadata:
+      labels:
+        app: goodblast-be
+    spec:
+      containers:
+      - image: goodblast/goodblast-be:0.1.0-c1699104752
+        name: goodblast-be
+        envFrom:
+        - configMapRef:
+            name: goodblast-be-cm
+        ports:
+          - containerPort: 8080
