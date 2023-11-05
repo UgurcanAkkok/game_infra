@@ -1,3 +1,5 @@
+# WIP
+Knative configs is WIP and not ready to deploy.
 
 ## Knative Operator
 

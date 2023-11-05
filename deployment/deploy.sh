@@ -24,7 +24,7 @@ FULL_IMAGE_NAME="$(cat ../source/.full_image_name)"
 cd $ORIG_PWD/kustomize/$CLUSTER
 kustomize edit set image $FULL_IMAGE_NAME
 
-### Apply the kustomize
+### Apply the kustomize files
 
 cd $ORIG_PWD/kustomize
 
