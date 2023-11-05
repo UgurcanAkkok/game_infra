@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: goodblast-be
+  name: goodblast-be
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: goodblast-be
+  template:
+    metadata:
+      labels:
+        app: goodblast-be
+    spec:
+      containers:
+      - image: goodblast/goodblast-be:0.1.0-c1699104752
+        name: goodblast-be
+        ports:
+          - containerPort: 8080
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: goodblast-be
+  name: goodblast-be
+  namespace: default
+spec:
+  internalTrafficPolicy: Cluster
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: goodblast-be
+  sessionAffinity: None
+  type: ClusterIP
