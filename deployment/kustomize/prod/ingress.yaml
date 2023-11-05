@@ -7,7 +7,7 @@ metadata:
     ingress.class: "haproxy"
 spec:
   rules:
-  - host: api.gameblast.uakkok.io
+  - host: api.goodblast.uakkok.io
     http:
       paths:
       - path: /

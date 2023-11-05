@@ -1,14 +1,14 @@
 kubernetes = {
-  name                 = "gameblast-eks"
+  name                 = "goodblast-eks"
   instance_type        = "t2.micro"
-  node_group_name      = "gameblast-eks-nodegroup"
+  node_group_name      = "goodblast-eks-nodegroup"
   scaling_min_size     = 1
   scaling_max_size     = 3
   scaling_desired_size = 2
 }
 
 iam = {
-  kubernetes_role_name       = "gameblast-eks-role"
+  kubernetes_role_name       = "goodblast-eks-role"
 }
 
 network = {
