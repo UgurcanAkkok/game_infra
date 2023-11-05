@@ -1,37 +1,38 @@
 // Kubernetes
-resource "aws_eks_cluster" "dev-eks" {
-  name     = "dev-eks"
-  role_arn = aws_iam_role.dev-eks-role.arn
+resource "aws_eks_cluster" "gameblast-eks" {
+  name     = var.kubernetes.name
+  role_arn = aws_iam_role.gameblast-eks-role.arn
 
   vpc_config {
-    subnet_ids = [aws_subnet.dev-subnet.id]
+    subnet_ids = [aws_subnet.gameblast-subnet-eks1.id,aws_subnet.gameblast-subnet-eks2.id]
   }
 
   depends_on = [
-    aws_iam_role_policy_attachment.dev-AmazonEKSClusterPolicy,
-    aws_iam_role_policy_attachment.dev-AmazonEKSVPCResourceController,
+    aws_iam_role_policy_attachment.gameblast-AmazonEKSClusterPolicy,
+    aws_iam_role_policy_attachment.gameblast-AmazonEKSVPCResourceController,
   ]
 }
 
+resource "aws_eks_node_group" "gameblast-eks-nodegroup" {
+  cluster_name    = aws_eks_cluster.gameblast-eks.name
+  node_group_name = var.kubernetes.node_group_name
+  node_role_arn   = aws_iam_role.gameblast-eks-role.arn
+  subnet_ids      = [aws_subnet.gameblast-subnet-eks1.id,aws_subnet.gameblast-subnet-eks2.id]
+  instance_types  = [var.kubernetes.instance_type]
+  scaling_config {
+    desired_size = var.kubernetes.scaling_desired_size
+    min_size     = var.kubernetes.scaling_min_size
+    max_size     = var.kubernetes.scaling_max_size
+  }
+  depends_on = [aws_eks_cluster.gameblast-eks]
+}
+
 output "endpoint" {
-  value = aws_eks_cluster.dev-eks.endpoint
+  value = aws_eks_cluster.gameblast-eks.endpoint
 }
 
 output "kubeconfig-certificate-authority-data" {
-  value = aws_eks_cluster.dev-eks.certificate_authority[0].data
-}
-
-resource "aws_eks_node_group" "dev-eks-nodegroup" {
-  cluster_name    = aws_eks_cluster.dev-eks.name
-  node_group_name = "dev-eks-nodegroup"
-  node_role_arn   = aws_iam_role.dev-eks-role.arn
-  subnet_ids      = [aws_subnet.dev-subnet.id]
-  scaling_config {
-    desired_size = 1
-    min_size     = 1
-    max_size     = 1
-  }
-  depends_on = [aws_eks_cluster.dev-eks]
+  value = aws_eks_cluster.gameblast-eks.certificate_authority[0].data
 }
 
 // Iam
@@ -41,36 +42,56 @@ data "aws_iam_policy_document" "assume_role" {
 
     principals {
       type        = "Service"
-      identifiers = ["eks.amazonaws.com"]
+      identifiers = [
+        "eks.amazonaws.com",
+        "ec2.amazonaws.com",
+      ]
     }
 
     actions = ["sts:AssumeRole"]
   }
 }
 
-resource "aws_iam_role" "dev-eks-role" {
-  name               = "dev-eks-role"
+resource "aws_iam_role" "gameblast-eks-role" {
+  name               = var.iam.kubernetes_role_name
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
-resource "aws_iam_role_policy_attachment" "dev-AmazonEKSClusterPolicy" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-  role       = aws_iam_role.dev-eks-role.name
+resource "aws_iam_role_policy_attachment" "gameblast-AmazonEC2ContainerRegistryReadOnly" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  role       = aws_iam_role.gameblast-eks-role.name
 }
 
-resource "aws_iam_role_policy_attachment" "dev-AmazonEKSVPCResourceController" {
+resource "aws_iam_role_policy_attachment" "gameblast-AmazonEKSWorkerNodePolicy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+  role       = aws_iam_role.gameblast-eks-role.name
+}
+
+resource "aws_iam_role_policy_attachment" "gameblast-AmazonEKSClusterPolicy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+  role       = aws_iam_role.gameblast-eks-role.name
+}
+
+resource "aws_iam_role_policy_attachment" "gameblast-AmazonEKSVPCResourceController" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
-  role       = aws_iam_role.dev-eks-role.name
+  role       = aws_iam_role.gameblast-eks-role.name
 }
 
 // Network
-resource "aws_subnet" "dev-subnet" {
-  vpc_id     = aws_vpc.dev-main-vpc.id
-  cidr_block = "10.0.10.0/24"
+resource "aws_subnet" "gameblast-subnet-eks1" {
+  vpc_id     = aws_vpc.gameblast-vpc.id
+  cidr_block = var.network.eks_cidr_block1
+  availability_zone = "eu-central-1a"
 }
 
-resource "aws_vpc" "dev-main-vpc" {
-  cidr_block       = "10.0.0.0/16"
+resource "aws_subnet" "gameblast-subnet-eks2" {
+  vpc_id     = aws_vpc.gameblast-vpc.id
+  cidr_block = var.network.eks_cidr_block2
+  availability_zone = "eu-central-1b"
+}
+
+resource "aws_vpc" "gameblast-vpc" {
+  cidr_block       = var.network.vpc_cidr_block
   instance_tenancy = "default"
 }
 
