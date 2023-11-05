@@ -1,0 +1,42 @@
+pipeline {
+  agent any
+  stages {
+    stage('Lint') {
+      steps {
+        script {
+          dir('source/') {
+            sh './lint.sh'
+          }
+        }
+      }
+    }
+    stage('Test') {
+      steps {
+        script {
+          dir('source/') {
+            sh './test.sh'
+          }
+        }
+      }
+    }
+    stage('Build & Push') {
+      steps {
+        script {
+          dir('source/') {
+            // Puts the full image name into the source/.full_image_name file
+            sh './build.sh'
+          }
+        }
+      }
+    }
+    stage('Deploy') {
+      steps {
+        script {
+          dir('deployment/') {
+            sh "./deploy.sh ${ENVIRONMENT}"
+          }
+        }
+      }
+    }
+  }
+}
